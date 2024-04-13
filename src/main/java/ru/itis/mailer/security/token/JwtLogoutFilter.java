@@ -25,11 +25,13 @@ public class JwtLogoutFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         if (logoutRequest.matches(request)) {
+            System.out.println("LOGOUT FILTER");
             String refresh = request.getHeader("REFRESH-TOKEN");
             tokenRepository.deleteByRefreshToken(refresh);
             SecurityContextHolder.clearContext();
             return;
         }
         filterChain.doFilter(request, response);
+        return;
     }
 }

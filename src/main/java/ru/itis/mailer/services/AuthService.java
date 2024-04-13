@@ -6,6 +6,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import ru.itis.mailer.dto.AuthResponse;
 import ru.itis.mailer.dto.UserLoginDto;
 import ru.itis.mailer.models.Token;
 import ru.itis.mailer.models.User;
@@ -19,7 +20,7 @@ import java.util.List;
 public class AuthService {
 
     @Autowired
-    private  UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -36,7 +37,7 @@ public class AuthService {
     @Value("${security.jwt.refresh-token-expiration-time}")
     private long jwtRefreshExpiration;
 
-    public List<String> authenticate(UserLoginDto input) {
+    public AuthResponse authenticate(UserLoginDto input) {
         User user = userRepository.findByEmail(input.getEmail())
                 .orElseThrow();
         if (passwordEncoder.matches(input.getPassword(), user.getPassword())) {
@@ -47,8 +48,15 @@ public class AuthService {
                     .time_of_creating(tokensUtil.getRefreshTime())
                     .build();
             tokensRepository.save(token);
-            return List.of(tokensUtil.getAccessToken(), tokensUtil.getRefreshToken());
+
+            return AuthResponse.
+                    builder().
+                    accessToken(tokensUtil.getAccessToken()).
+                    refreshToken(tokensUtil.getRefreshToken()).
+                    userId(user.getId())
+                    .role(user.getRole().getAuthority())
+                    .build();
         }
-        return List.of();
+        return new AuthResponse();
     }
 }

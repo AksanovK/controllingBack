@@ -24,10 +24,13 @@ public class RefreshTokenFilter extends OncePerRequestFilter {
         if (token != null) {
             if (refreshService.refreshCheck(token)) {
                 filterChain.doFilter(request, response);
+                return;
             } else {
-                response.sendRedirect("/auth");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Unauthorized");
+                return;
             }
         }
-        return;
+        filterChain.doFilter(request, response);
     }
 }

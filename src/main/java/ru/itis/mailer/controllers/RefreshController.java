@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,7 +29,7 @@ public class RefreshController {
     @Value("${security.jwt.secret-key}")
     private String secretKey;
 
-    @PostMapping("/refresh")
+    @GetMapping("/refresh")
     public ResponseEntity<?> refresh(@RequestHeader("REFRESH-TOKEN") String requestToken) {
         if (requestToken != null) {
             Jws<Claims> jws = Jwts.parserBuilder()

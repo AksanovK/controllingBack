@@ -41,7 +41,7 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return TokenAuthentication.class.equals(authentication);
+        return TokenAuthentication.class.isAssignableFrom(authentication);
     }
 
 }

@@ -3,6 +3,7 @@ package ru.itis.mailer.security.token;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 import ru.itis.mailer.security.details.UserDetailsImpl;
 
 import java.util.Collection;
