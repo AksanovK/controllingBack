@@ -1,5 +1,6 @@
 package ru.itis.mailer.repositories;
 
+import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -16,6 +17,6 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
     void deleteByUser_Id(Long id);
 
     Optional<Token> findByUser_Id(Long id);
-
+    @Transactional
     void deleteByRefreshToken(String token);
 }

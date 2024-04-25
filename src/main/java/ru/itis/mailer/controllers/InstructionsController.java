@@ -20,7 +20,12 @@ public class InstructionsController {
     private InstructionsService instructionsService;
 
     @GetMapping("/get")
-    public ResponseEntity<InstructionsResponse> authenticatedUser(@RequestParam Long userId) {
+    public ResponseEntity<InstructionsResponse> getInstructionParams(@RequestParam Long userId) {
         return ResponseEntity.ok(instructionsService.getInstructions(userId));
+    }
+
+    @PostMapping("/put")
+    public ResponseEntity<String> sendMailingInstructions() {
+        return ResponseEntity.ok("success");
     }
 }

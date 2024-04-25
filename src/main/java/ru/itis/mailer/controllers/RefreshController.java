@@ -3,6 +3,9 @@ package ru.itis.mailer.controllers;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +32,7 @@ public class RefreshController {
     @Value("${security.jwt.secret-key}")
     private String secretKey;
 
+    @Transactional
     @GetMapping("/refresh")
     public ResponseEntity<?> refresh(@RequestHeader("REFRESH-TOKEN") String requestToken) {
         if (requestToken != null) {

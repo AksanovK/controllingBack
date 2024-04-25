@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -25,10 +26,11 @@ public class JwtLogoutFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         if (logoutRequest.matches(request)) {
-            System.out.println("LOGOUT FILTER");
             String refresh = request.getHeader("REFRESH-TOKEN");
-            tokenRepository.deleteByRefreshToken(refresh);
-            SecurityContextHolder.clearContext();
+            if (refresh != null) {
+                tokenRepository.deleteByRefreshToken(refresh);
+                SecurityContextHolder.clearContext();
+            }
             return;
         }
         filterChain.doFilter(request, response);

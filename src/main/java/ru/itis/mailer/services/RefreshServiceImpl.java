@@ -80,6 +80,7 @@ public class RefreshServiceImpl implements RefreshService {
             return false;
         }
     }
+
     @Transactional
     @Override
     public List<String> generateTokens(User user) {

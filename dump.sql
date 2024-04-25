@@ -36,6 +36,7 @@ CREATE TABLE contact (
                          id SERIAL PRIMARY KEY,
                          firstName VARCHAR(255),
                          lastName VARCHAR(255),
+    --TODO: gender
                          birthday DATE,
                          isForeigner BOOLEAN,
                          book_id INTEGER REFERENCES address_book(id),

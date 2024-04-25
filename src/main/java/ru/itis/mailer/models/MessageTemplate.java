@@ -5,8 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.itis.mailer.enums.AddressBookState;
-import ru.itis.mailer.enums.UserRole;
+import ru.itis.mailer.enums.ContactInfoType;
+import ru.itis.mailer.enums.MessageState;
 
 import java.time.LocalDateTime;
 
@@ -15,24 +15,20 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "address_book")
-public class AddressBook {
+@Table(name = "message_template")
+public class MessageTemplate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false, length = 255)
+    @Column(length = 255)
     private String name;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private AddressBookState state;
+    @Column(length = 255)
+    private String subject;
 
     @Column(length = 255)
-    private String description;
-
-    @Column(name = "count_of_contacts")
-    private Integer countOfContacts;
+    private String body;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id", referencedColumnName = "id")
@@ -43,5 +39,4 @@ public class AddressBook {
 
     @Column(name = "updated_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime updatedAt;
-
 }
