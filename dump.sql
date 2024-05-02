@@ -106,3 +106,11 @@ CREATE TABLE files (
                       CONSTRAINT fk_creator_id FOREIGN KEY (creator_id) REFERENCES users(id)
 );
 ALTER TABLE attachment ADD CONSTRAINT fk_message_id FOREIGN KEY (message_id) REFERENCES message(id) ON DELETE RESTRICT;
+
+-- Создание таблицы telegram_data В ДРУГОЙ БАЗЕ ДАННЫХ
+DROP TABLE IF EXISTS telegram_data;
+CREATE TABLE IF NOT EXISTS telegram_data (
+                                             id SERIAL PRIMARY KEY,
+                                             user_id BIGINT NOT NULL ,
+                                             username VARCHAR(255) NOT NULL
+);
