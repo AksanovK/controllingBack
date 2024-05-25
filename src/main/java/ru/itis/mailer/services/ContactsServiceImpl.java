@@ -2,6 +2,9 @@ package ru.itis.mailer.services;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.itis.mailer.dto.AddressBookDto;
 import ru.itis.mailer.dto.ContactDto;
@@ -52,6 +55,55 @@ public class ContactsServiceImpl implements ContactsService {
             return contacts.stream().map(this::convertToDto).collect(Collectors.toList());
         }
         return new ArrayList<>();
+    }
+
+    @Override
+    @Transactional
+    public Page<ContactDto> getContactsPaginated(Long bookId, Integer page, Integer pageSize) {
+        try {
+            Pageable pageable = PageRequest.of(page, pageSize);
+            Page<Contact> contactPage;
+
+            if (bookId == 0) {
+                contactPage = contactRepository.findAll(pageable);
+            } else {
+                contactPage = contactRepository.findByBookId(bookId, pageable);
+            }
+            System.out.println("Contacts found: " + contactPage.getTotalElements());
+            System.out.println(contactPage.map(this::convertToDto));
+            return contactPage.map(this::convertToDto);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+
+    @Override
+    @Transactional
+    public Page<ContactDto> searchContacts(Long bookId, Integer page, Integer pageSize, String searchQuery) {
+        Pageable pageable = PageRequest.of(page, pageSize);
+        try {
+            Page<Contact> contactPage;
+            if (bookId == 0) {
+                if (!searchQuery.isBlank()) {
+                    contactPage = contactRepository.findByFirstNameContainingIgnoreCase(searchQuery, pageable);
+                } else {
+                    contactPage = contactRepository.findAll(pageable);
+                }
+            } else {
+                if (!searchQuery.isBlank()) {
+                    contactPage = contactRepository.findByBookIdAndFirstNameContainingIgnoreCase(bookId, searchQuery, pageable);
+                } else {
+                    contactPage = contactRepository.findByBookId(bookId, pageable);
+                }
+            }
+            System.out.println("Contacts found: " + contactPage.getTotalElements());
+            System.out.println(contactPage.map(this::convertToDto));
+            return contactPage.map(this::convertToDto);
+        } catch (Exception e) {
+            System.err.println("Error during searchContacts: " + e.getMessage());
+            return Page.empty();
+        }
     }
 
     private ContactInfoDto convertContactInfoToDto(ContactInfo contactInfo) {

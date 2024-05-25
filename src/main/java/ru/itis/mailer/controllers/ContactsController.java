@@ -1,6 +1,7 @@
 package ru.itis.mailer.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.itis.mailer.dto.AddressBookDto;
@@ -27,8 +28,23 @@ public class ContactsController {
     }
 
     @GetMapping("/getContactPage")
-    public ResponseEntity<ContactDto> getContactsByBookId(@RequestParam Long contactId) {
+    public ResponseEntity<ContactDto> getContact(@RequestParam Long contactId) {
         return ResponseEntity.ok(contactsService.getContactById(contactId));
+    }
+
+    @GetMapping("/getContacts")
+    public ResponseEntity<Page<ContactDto>> getContacts(@RequestParam Long bookId,
+                                                        @RequestParam Integer page,
+                                                        @RequestParam Integer pageSize) {
+        return ResponseEntity.ok(contactsService.getContactsPaginated(bookId, page, pageSize));
+    }
+
+    @GetMapping("/searchContacts")
+    public ResponseEntity<Page<ContactDto>> searchContacts(@RequestParam Long bookId,
+                                                        @RequestParam Integer page,
+                                                        @RequestParam Integer pageSize,
+                                                        @RequestParam String searchQuery) {
+        return ResponseEntity.ok(contactsService.searchContacts(bookId, page, pageSize, searchQuery));
     }
 
 }

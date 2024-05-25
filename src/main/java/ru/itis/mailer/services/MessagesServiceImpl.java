@@ -3,10 +3,7 @@ package ru.itis.mailer.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import ru.itis.mailer.dto.ContactInfoDto;
-import ru.itis.mailer.dto.ContactKafkaDto;
-import ru.itis.mailer.dto.MessageDto;
-import ru.itis.mailer.dto.MessageKafkaDto;
+import ru.itis.mailer.dto.*;
 import ru.itis.mailer.enums.ContactInfoType;
 import ru.itis.mailer.enums.MessageState;
 import ru.itis.mailer.models.*;
@@ -113,6 +110,43 @@ public class MessagesServiceImpl implements MessagesService {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    @Override
+    public boolean sendContactsMessage(ContactMessageDto contactMessageDto) {
+        boolean result = false;
+        try {
+            List<Long> contactsIds = contactMessageDto.getContacts();
+            List<ContactInfoType> infoDtoList = contactMessageDto.getContactInfo();
+            for (ContactInfoType contactInfoType : infoDtoList) {
+                List<ContactKafkaDto> kafkaContacts = new ArrayList<>();
+                for (Long contactId : contactsIds) {
+                    Optional<Contact> contact = contactRepository.findById(contactId);
+                    if (contact.isPresent()) {
+                        ContactInfo contactInfo = contactInfoRepository.findByContact_IdAndType(contactId, contactInfoType);
+                        kafkaContacts.add(ContactKafkaDto.builder()
+                                .firstName(contact.get().getFirstName())
+                                .lastName(contact.get().getLastName())
+                                .bookName("-")
+                                .address(contactInfo.getValue())
+                                .build()
+                        );
+                    }
+                }
+                kafkaTemplate.send(contactInfoType.getValue(), MessageKafkaDto.builder()
+                        .body(contactMessageDto.getBody())
+                        .subject("Message from Mailer")
+                        .type(contactInfoType)
+                        .contacts(kafkaContacts)
+                        .build()
+                );
+                System.out.println("Sent message: " + contactMessageDto);
+            }
+            result = true;
+        } catch (Exception e) {
+            return result;
+        }
+        return result;
     }
 
     @Override

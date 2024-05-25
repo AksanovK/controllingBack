@@ -11,4 +11,6 @@ public interface AddressBooksService {
     void saveAddressBook(MultipartFile file, Long userId);
     void deleteAddressBook(Long bookId);
     List<AddressBookDto> getAddressBooksByUser(Long userId);
+
+    void renameAddressBook(Long bookId, String newName);
 }

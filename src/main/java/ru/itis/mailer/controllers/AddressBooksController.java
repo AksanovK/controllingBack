@@ -53,6 +53,12 @@ public class AddressBooksController {
         }
     }
 
+    @PostMapping("/renameAddressBook")
+    public ResponseEntity<?> renameAddressBook(@RequestParam("name") String name, @RequestParam("bookId") Long bookId) {
+        addressBooksService.renameAddressBook(bookId, name);
+        return ResponseEntity.ok("Книга успешно переименована");
+    }
+
     @Transactional
     @PostMapping("/deleteAddressBook")
     public ResponseEntity<?> deleteAddressBook(@RequestParam("bookId") Long bookId) {

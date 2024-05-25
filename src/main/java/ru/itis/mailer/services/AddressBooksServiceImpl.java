@@ -147,4 +147,12 @@ public class AddressBooksServiceImpl implements AddressBooksService {
         }
         return new ArrayList<>();
     }
+
+    @Override
+    public void renameAddressBook(Long bookId, String newName) {
+        AddressBook addressBook = addressBookRepository.findById(bookId)
+                .orElseThrow(() -> new IllegalArgumentException("AddressBook not found with id: " + bookId));
+        addressBook.setName(newName);
+        addressBookRepository.save(addressBook);
+    }
 }

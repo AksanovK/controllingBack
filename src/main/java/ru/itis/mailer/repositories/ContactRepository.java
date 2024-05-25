@@ -1,5 +1,7 @@
 package ru.itis.mailer.repositories;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,4 +21,8 @@ public interface ContactRepository extends JpaRepository<Contact, Long> {
     List<Contact> findAllByBook(@Param("book") AddressBook book);
 
     void deleteAllByBook_Id(Long bookId);
+    Page<Contact> findByBookId(Long bookId, Pageable pageable);
+    Page<Contact> findByFirstNameContainingIgnoreCase(String firstName, Pageable pageable);
+
+    Page<Contact> findByBookIdAndFirstNameContainingIgnoreCase(Long bookId, String firstName, Pageable pageable);
 }
