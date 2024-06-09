@@ -3,20 +3,21 @@ package ru.itis.mailer.controllers;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.itis.mailer.models.User;
 import ru.itis.mailer.repositories.UserRepository;
 import ru.itis.mailer.services.RefreshService;
+
+import java.util.List;
 
 import static ru.itis.mailer.security.token.TokensUtil.getSignInKey;
 
@@ -29,23 +30,22 @@ public class RefreshController {
     @Autowired
     public UserRepository usersRepository;
 
-    @Value("${security.jwt.secret-key}")
-    private String secretKey;
-
     @Transactional
     @GetMapping("/refresh")
-    public ResponseEntity<?> refresh(@RequestHeader("REFRESH-TOKEN") String requestToken) {
+    public ResponseEntity<?> refresh(@CookieValue(value = "refreshToken", required = false) String requestToken, HttpServletResponse response) {
         if (requestToken != null) {
-            Jws<Claims> jws = Jwts.parserBuilder()
-                    .setSigningKey(getSignInKey(secretKey))
-                    .build()
-                    .parseClaimsJws(requestToken);
-            String userId = jws.getBody().getSubject();
-            User user = usersRepository.findById((int) Long.parseLong(userId))
-                    .orElseThrow(() -> new UsernameNotFoundException(userId));
-            return ResponseEntity.ok(refreshService.generateTokens(user));
+            List<String> tokens = refreshService.generateTokens(requestToken);
+            if (!tokens.isEmpty()) {
+                Cookie refreshTokenCookie = new Cookie("refreshToken", tokens.get(1));
+                refreshTokenCookie.setHttpOnly(true);
+                refreshTokenCookie.setSecure(false);
+                refreshTokenCookie.setPath("/");
+                refreshTokenCookie.setMaxAge(28 * 24 * 60 * 60);
+                response.addCookie(refreshTokenCookie);
+            }
+            return ResponseEntity.ok(tokens);
         } else {
-            return ResponseEntity.ok("Bad token");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Refresh token is missing");
         }
     }
 }

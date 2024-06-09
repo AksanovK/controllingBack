@@ -53,7 +53,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
-        return path.startsWith("/refresh");
+        return path.startsWith("/api/logout") || path.startsWith("/api/refresh");
     }
 
     @SneakyThrows

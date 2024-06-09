@@ -15,6 +15,7 @@ import ru.itis.mailer.repositories.UserRepository;
 import ru.itis.mailer.security.token.TokensUtil;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AuthService {
@@ -41,6 +42,8 @@ public class AuthService {
         User user = userRepository.findByEmail(input.getEmail())
                 .orElseThrow();
         if (passwordEncoder.matches(input.getPassword(), user.getPassword())) {
+            Optional<Token> tokenOptional = tokensRepository.findByUser_Id(user.getId());
+            tokenOptional.ifPresent(token -> tokensRepository.deleteByRefreshToken(token.getRefreshToken()));
             TokensUtil tokensUtil = new TokensUtil(user, jwtAccessExpiration, jwtRefreshExpiration, secretKey);
             Token token = Token.builder()
                     .refreshToken(tokensUtil.getRefreshToken())

@@ -12,6 +12,7 @@ public interface RefreshService {
     boolean accessCheck(String accessToken);
     boolean refreshCheck(String refreshToken);
 
-    List<String> generateTokens(User user);
+    List<String> generateTokens(String refreshToken);
 
+    void clearToken(String token);
 }

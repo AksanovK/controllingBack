@@ -22,13 +22,6 @@ public class LoginController {
     public ResponseEntity<AuthResponse> authenticate(@RequestBody UserLoginDto loginUserDto, HttpServletResponse response) {
         AuthResponse authResponse = authenticationService.authenticate(loginUserDto);
 
-        Cookie accessTokenCookie = new Cookie("accessToken", authResponse.getAccessToken());
-        accessTokenCookie.setHttpOnly(true);
-        accessTokenCookie.setSecure(false); //TODO: https - true
-        accessTokenCookie.setPath("/");
-        accessTokenCookie.setMaxAge(7 * 24 * 60 * 60);
-        response.addCookie(accessTokenCookie);
-
         Cookie refreshTokenCookie = new Cookie("refreshToken", authResponse.getRefreshToken());
         refreshTokenCookie.setHttpOnly(true);
         refreshTokenCookie.setSecure(false);

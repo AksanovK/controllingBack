@@ -23,6 +23,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import static ru.itis.mailer.security.token.TokensUtil.getSignInKey;
+
 @Service
 public class RefreshServiceImpl implements RefreshService {
     @Autowired
@@ -83,17 +85,30 @@ public class RefreshServiceImpl implements RefreshService {
 
     @Transactional
     @Override
-    public List<String> generateTokens(User user) {
-        Token refresh_token = tokensRepository.findByUser_Id(user.getId()).orElseThrow(() -> new UsernameNotFoundException(user.getId().toString()));
+    public List<String> generateTokens(String refreshToken) {
+        Jws<Claims> jws = Jwts.parserBuilder()
+                .setSigningKey(getSignInKey())
+                .build()
+                .parseClaimsJws(refreshToken);
+
+        String userId = jws.getBody().getSubject();
+        User user = usersRepository.findById((int) Long.parseLong(userId))
+                .orElseThrow(() -> new UsernameNotFoundException(userId));
+        Optional<Token> existingToken = tokensRepository.findByRefreshToken(refreshToken);
+        if (existingToken.isPresent()) {
+            tokensRepository.delete(existingToken.get());
+            tokensRepository.flush();
+        }
         TokensUtil tokensUtil = new TokensUtil(user, jwtAccessExpiration, jwtRefreshExpiration, secretKey);
-        String new_refresh_token = tokensUtil.getRefreshToken();
-        tokensRepository.deleteByRefreshToken(refresh_token.getRefreshToken());
-        Token new_token = new Token(new_refresh_token, new Date(), user);
-        tokensRepository.save(new_token);
-        List<String> list = new ArrayList<>();
-        list.add(tokensUtil.getAccessToken());
-        list.add(tokensUtil.getRefreshToken());
-        return list;
+        String newRefreshToken = tokensUtil.getRefreshToken();
+        Token newToken = new Token(newRefreshToken, new Date(), user);
+        tokensRepository.save(newToken);
+        return List.of(tokensUtil.getAccessToken(), newRefreshToken);
+    }
+
+    @Override
+    public void clearToken(String token) {
+        tokensRepository.deleteByRefreshToken(token);
     }
 
     private Key getSignInKey() {
